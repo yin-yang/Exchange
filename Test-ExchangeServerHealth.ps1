@@ -127,27 +127,27 @@ V1.17, 17/05/2017 - Fixed bug with auto-suspended content index detection
 
 [CmdletBinding()]
 param (
-        [Parameter( Mandatory=$false)]
-        [string]$Server,
+    [Parameter( Mandatory = $false)]
+    [string]$Server,
 
-        [Parameter( Mandatory=$false)]
-        [string]$ServerList,    
+    [Parameter( Mandatory = $false)]
+    [string]$ServerList,    
         
-        [Parameter( Mandatory=$false)]
-        [string]$ReportFile="exchangeserverhealth.html",
+    [Parameter( Mandatory = $false)]
+    [string]$ReportFile = "exchangeserverhealth.html",
 
-        [Parameter( Mandatory=$false)]
-        [switch]$ReportMode,
+    [Parameter( Mandatory = $false)]
+    [switch]$ReportMode,
         
-        [Parameter( Mandatory=$false)]
-        [switch]$SendEmail,
+    [Parameter( Mandatory = $false)]
+    [switch]$SendEmail,
 
-        [Parameter( Mandatory=$false)]
-        [switch]$AlertsOnly,    
+    [Parameter( Mandatory = $false)]
+    [switch]$AlertsOnly,    
         
-        [Parameter( Mandatory=$false)]
-        [switch]$Log
-    )
+    [Parameter( Mandatory = $false)]
+    [switch]$Log
+)
 
 
 #...................................
@@ -188,11 +188,11 @@ $logfile = "$myDir\exchangeserverhealth.log"
 #...................................
 
 $smtpsettings = @{
-    To =  "administrator@exchangeserverpro.net"
-    From = "exchangeserver@exchangeserverpro.net"
-    Subject = "$reportemailsubject - $now"
+    To         = "administrator@exchangeserverpro.net"
+    From       = "exchangeserver@exchangeserverpro.net"
+    Subject    = "$reportemailsubject - $now"
     SmtpServer = "smtp.exchangeserverpro.net"
-    }
+}
 
 
 #...................................
@@ -299,14 +299,12 @@ $string69 = "DAG databases to check"
 #...................................
 
 #This function is used to generate HTML for the DAG member health report
-Function New-DAGMemberHTMLTableCell()
-{
+Function New-DAGMemberHTMLTableCell() {
     param( $lineitem )
     
     $htmltablecell = $null
 
-    switch ($($line."$lineitem"))
-    {
+    switch ($($line."$lineitem")) {
         $null { $htmltablecell = "<td>n/a</td>" }
         "Passed" { $htmltablecell = "<td class=""pass"">$($line."$lineitem")</td>" }
         default { $htmltablecell = "<td class=""warn"">$($line."$lineitem")</td>" }
@@ -316,84 +314,75 @@ Function New-DAGMemberHTMLTableCell()
 }
 
 #This function is used to generate HTML for the server health report
-Function New-ServerHealthHTMLTableCell()
-{
+Function New-ServerHealthHTMLTableCell() {
     param( $lineitem )
     
     $htmltablecell = $null
     
-    switch ($($reportline."$lineitem"))
-    {
-        $success {$htmltablecell = "<td class=""pass"">$($reportline."$lineitem")</td>"}
-        "Success" {$htmltablecell = "<td class=""pass"">$($reportline."$lineitem")</td>"}
-        "Pass" {$htmltablecell = "<td class=""pass"">$($reportline."$lineitem")</td>"}
-        "Warn" {$htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>"}
-        "Access Denied" {$htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>"}
-        "Fail" {$htmltablecell = "<td class=""fail"">$($reportline."$lineitem")</td>"}
-        "Could not test service health. " {$htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>"}
-        "Unknown" {$htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>"}
-        default {$htmltablecell = "<td>$($reportline."$lineitem")</td>"}
+    switch ($($reportline."$lineitem")) {
+        $success { $htmltablecell = "<td class=""pass"">$($reportline."$lineitem")</td>" }
+        "Success" { $htmltablecell = "<td class=""pass"">$($reportline."$lineitem")</td>" }
+        "Pass" { $htmltablecell = "<td class=""pass"">$($reportline."$lineitem")</td>" }
+        "Warn" { $htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>" }
+        "Access Denied" { $htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>" }
+        "Fail" { $htmltablecell = "<td class=""fail"">$($reportline."$lineitem")</td>" }
+        "Could not test service health. " { $htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>" }
+        "Unknown" { $htmltablecell = "<td class=""warn"">$($reportline."$lineitem")</td>" }
+        default { $htmltablecell = "<td>$($reportline."$lineitem")</td>" }
     }
     
     return $htmltablecell
 }
 
 #This function is used to write the log file if -Log is used
-Function Write-Logfile()
-{
+Function Write-Logfile() {
     param( $logentry )
     $timestamp = Get-Date -DisplayHint Time
     "$timestamp $logentry" | Out-File $logfile -Append
 }
 
 #This function is used to test service health for Exchange 2013 CAS-only servers
-Function Test-E15CASServiceHealth()
-{
+Function Test-E15CASServiceHealth() {
     param ( $e15cas )
     
     $e15casservicehealth = $null
     $servicesrunning = @()
     $servicesnotrunning = @()
     $casservices = @(
-                    "IISAdmin",
-                    "W3Svc",
-                    "WinRM",
-                    "MSExchangeADTopology",
-                    "MSExchangeDiagnostics",
-                    "MSExchangeFrontEndTransport",
-                    #"MSExchangeHM",
-                    "MSExchangeIMAP4",
-                    "MSExchangePOP3",
-                    "MSExchangeServiceHost",
-                    "MSExchangeUMCR"
-                    )
+        "IISAdmin",
+        "W3Svc",
+        "WinRM",
+        "MSExchangeADTopology",
+        "MSExchangeDiagnostics",
+        "MSExchangeFrontEndTransport",
+        #"MSExchangeHM",
+        "MSExchangeIMAP4",
+        "MSExchangePOP3",
+        "MSExchangeServiceHost",
+        "MSExchangeUMCR"
+    )
         
     try {
-        $servicestates = @(Get-WmiObject -ComputerName $e15cas -Class Win32_Service -ErrorAction STOP | Where-Object {$casservices -icontains $_.Name} | Select-Object name,state,startmode)
+        $servicestates = @(Get-WmiObject -ComputerName $e15cas -Class Win32_Service -ErrorAction STOP | Where-Object { $casservices -icontains $_.Name } | Select-Object name, state, startmode)
     }
-    catch
-    {
-        if ($Log) {Write-LogFile $_.Exception.Message}
+    catch {
+        if ($Log) { Write-LogFile $_.Exception.Message }
         Write-Warning $_.Exception.Message
         $e15casservicehealth = "Fail"
     }    
     
-    if (!($e15casservicehealth))
-    {
-        $servicesrunning = @($servicestates | Where-Object {$_.StartMode -eq "Auto" -and $_.State -eq "Running"})
-        $servicesnotrunning = @($servicestates | Where-Object {$_.Startmode -eq "Auto" -and $_.State -ne "Running"})
-        if ($($servicesnotrunning.Count) -gt 0)
-        {
+    if (!($e15casservicehealth)) {
+        $servicesrunning = @($servicestates | Where-Object { $_.StartMode -eq "Auto" -and $_.State -eq "Running" })
+        $servicesnotrunning = @($servicestates | Where-Object { $_.Startmode -eq "Auto" -and $_.State -ne "Running" })
+        if ($($servicesnotrunning.Count) -gt 0) {
             Write-Verbose "Service health check failed"
             Write-Verbose "Services not running:"
-            foreach ($service in $servicesnotrunning)
-            {
+            foreach ($service in $servicesnotrunning) {
                 Write-Verbose "- $($service.Name)"    
             }
             $e15casservicehealth = "Fail"    
         }
-        else
-        {
+        else {
             Write-Verbose "Service health check passed"
             $e15casservicehealth = "Pass"
         }
@@ -402,41 +391,35 @@ Function Test-E15CASServiceHealth()
 }
 
 #This function is used to test mail flow for Exchange 2013 Mailbox servers
-Function Test-E15MailFlow()
-{
+Function Test-E15MailFlow() {
     param ( $e15mailboxserver )
 
     $e15mailflowresult = $null
     
     Write-Verbose "Creating PSSession for $e15mailboxserver"
-    $url = (Get-PowerShellVirtualDirectory -Server $e15mailboxserver -AdPropertiesOnly | Where-Object {$_.Name -eq "Powershell (Default Web Site)"}).InternalURL.AbsoluteUri
-    if ($url -eq $null)
-    {
+    $url = (Get-PowerShellVirtualDirectory -Server $e15mailboxserver -AdPropertiesOnly | Where-Object { $_.Name -eq "Powershell (Default Web Site)" }).InternalURL.AbsoluteUri
+    if ($url -eq $null) {
         $url = "http://$e15mailboxserver/powershell"
     }
 
-    try
-    {
+    try {
         $session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri $url -ErrorAction STOP
     }
-    catch
-    {
+    catch {
         Write-Verbose "Something went wrong"
-        if ($Log) {Write-LogFile $_.Exception.Message}
+        if ($Log) { Write-LogFile $_.Exception.Message }
         Write-Warning $_.Exception.Message
         $e15mailflowresult = "Fail"
     }
 
-    try
-    {
+    try {
         Write-Verbose "Running mail flow test on $e15mailboxserver"
-        $result = Invoke-Command -Session $session {Test-Mailflow} -ErrorAction STOP
+        $result = Invoke-Command -Session $session { Test-Mailflow } -ErrorAction STOP
         $e15mailflowresult = $result.TestMailflowResult
     }
-    catch
-    {
+    catch {
         Write-Verbose "An error occurred"
-        if ($Log) {Write-LogFile $_.Exception.Message}
+        if ($Log) { Write-LogFile $_.Exception.Message }
         Write-Warning $_.Exception.Message
         $e15mailflowresult = "Fail"
     }
@@ -449,47 +432,41 @@ Function Test-E15MailFlow()
 }
 
 #This function is used to test replication health for Exchange 2010 DAG members in mixed 2010/2013 organizations
-Function Test-E14ReplicationHealth()
-{
+Function Test-E14ReplicationHealth() {
     param ( $e14mailboxserver )
 
     $e14replicationhealth = $null
     
     #Find an E14 CAS in the same site
     $ADSite = (Get-ExchangeServer $e14mailboxserver).Site
-    $e14cas = (Get-ExchangeServer | Where-Object {$_.IsClientAccessServer -and $_.AdminDisplayVersion -match "Version 14" -and $_.Site -eq $ADSite} | Select-Object -first 1).FQDN
+    $e14cas = (Get-ExchangeServer | Where-Object { $_.IsClientAccessServer -and $_.AdminDisplayVersion -match "Version 14" -and $_.Site -eq $ADSite } | Select-Object -first 1).FQDN
 
     Write-Verbose "Creating PSSession for $e14cas"
-    $url = (Get-PowerShellVirtualDirectory -Server $e14cas -AdPropertiesOnly | Where-Object {$_.Name -eq "Powershell (Default Web Site)"}).InternalURL.AbsoluteUri
-    if ($url -eq $null)
-    {
+    $url = (Get-PowerShellVirtualDirectory -Server $e14cas -AdPropertiesOnly | Where-Object { $_.Name -eq "Powershell (Default Web Site)" }).InternalURL.AbsoluteUri
+    if ($url -eq $null) {
         $url = "http://$e14cas/powershell"
     }
 
     Write-Verbose "Using URL $url"
 
-    try
-    {
+    try {
         $session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri $url -ErrorAction STOP
     }
-    catch
-    {
+    catch {
         Write-Verbose "Something went wrong"
-        if ($Log) {Write-LogFile $_.Exception.Message}
+        if ($Log) { Write-LogFile $_.Exception.Message }
         Write-Warning $_.Exception.Message
         #$e14replicationhealth = "Fail"
     }
 
-    try
-    {
+    try {
         Write-Verbose "Running replication health test on $e14mailboxserver"
         #$e14replicationhealth = Invoke-Command -Session $session {Test-ReplicationHealth} -ErrorAction STOP
-        $e14replicationhealth = Invoke-Command -Session $session -Args $e14mailboxserver.Name {Test-ReplicationHealth $args[0]} -ErrorAction STOP
+        $e14replicationhealth = Invoke-Command -Session $session -Args $e14mailboxserver.Name { Test-ReplicationHealth $args[0] } -ErrorAction STOP
     }
-    catch
-    {
+    catch {
         Write-Verbose "An error occurred"
-        if ($Log) {Write-LogFile $_.Exception.Message}
+        if ($Log) { Write-LogFile $_.Exception.Message }
         Write-Warning $_.Exception.Message
         #$e14replicationhealth = "Fail"
     }
@@ -517,22 +494,19 @@ if ($Log) {
 }
 
 Write-Host $initstring0
-if ($Log) {Write-Logfile $initstring0}
+if ($Log) { Write-Logfile $initstring0 }
 
 #Add Exchange 2010 snapin if not already loaded in the PowerShell session
-if (!(Get-PSSnapin | Where-Object {$_.Name -eq "Microsoft.Exchange.Management.PowerShell.E2010"}))
-{
+if (!(Get-PSSnapin | Where-Object { $_.Name -eq "Microsoft.Exchange.Management.PowerShell.E2010" })) {
     Write-Verbose $initstring1
-    if ($Log) {Write-Logfile $initstring1}
-    try
-    {
+    if ($Log) { Write-Logfile $initstring1 }
+    try {
         Add-PSSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction STOP
     }
-    catch
-    {
+    catch {
         #Snapin was not loaded
         Write-Verbose $initstring2
-        if ($Log) {Write-Logfile $initstring2}
+        if ($Log) { Write-Logfile $initstring2 }
         Write-Warning $_.Exception.Message
         EXIT
     }
@@ -543,9 +517,8 @@ if (!(Get-PSSnapin | Where-Object {$_.Name -eq "Microsoft.Exchange.Management.Po
 
 #Set scope to include entire forest
 Write-Verbose $initstring3
-if ($Log) {Write-Logfile $initstring3}
-if (!(Get-ADServerSettings).ViewEntireForest)
-{
+if ($Log) { Write-Logfile $initstring3 }
+if (!(Get-ADServerSettings).ViewEntireForest) {
     Set-ADServerSettings -ViewEntireForest $true -WarningAction SilentlyContinue
 }
 
@@ -555,136 +528,114 @@ if (!(Get-ADServerSettings).ViewEntireForest)
 #...................................
 
 #Check if a single server was specified
-if ($server)
-{
+if ($server) {
     #Run for single specified server
     [bool]$NoDAG = $true
     Write-Verbose $string20
-    if ($Log) {Write-Logfile $string20}
-    try
-    {
+    if ($Log) { Write-Logfile $string20 }
+    try {
         $exchangeservers = Get-ExchangeServer $server -ErrorAction STOP
     }
-    catch
-    {
+    catch {
         #Exit because single server name was specified and couldn't be found in the organization
         Write-Verbose $string21
-        if ($Log) {Write-Logfile $string21}
+        if ($Log) { Write-Logfile $string21 }
         Write-Error $_.Exception.Message
         EXIT
     }
 }
-elseif ($serverlist)
-{
+elseif ($serverlist) {
     #Run for a list of servers in a text file
     [bool]$NoDAG = $true
     Write-Verbose $string23
-    if ($Log) {Write-Logfile $string23}
-    try
-    {
+    if ($Log) { Write-Logfile $string23 }
+    try {
         $tmpservers = @(Get-Content $serverlist -ErrorAction STOP)
         $exchangeservers = @($tmpservers | Get-ExchangeServer)
     }
-    catch
-    {
+    catch {
         #Exit because file could not be found
         Write-Verbose $string24
-        if ($Log) {Write-Logfile $string24}
+        if ($Log) { Write-Logfile $string24 }
         Write-Error $_.Exception.Message
         EXIT
     }
 }
-else
-{
+else {
     #This is the list of servers, DAGs, and databases to never alert for
-    try
-    {
+    try {
         $ignorelist = @(Get-Content $ignorelistfile -ErrorAction STOP)
-        if ($Log) {Write-Logfile $string28}
+        if ($Log) { Write-Logfile $string28 }
         if ($Log) {
-            if ($($ignorelist.count) -gt 0)
-            {
-                foreach ($line in $ignorelist)
-                {
+            if ($($ignorelist.count) -gt 0) {
+                foreach ($line in $ignorelist) {
                     Write-Logfile "- $line"
                 }
             }
-            else
-            {
+            else {
                 Write-Logfile $string38
             }
         }
     }
-    catch
-    {
+    catch {
         Write-Warning $string22
-        if ($Log) {Write-Logfile $string22}
+        if ($Log) { Write-Logfile $string22 }
     }
     
     #Get all servers
     Write-Verbose $string25
-    if ($Log) {Write-Logfile $string25}
-    $GetExchangeServerResults = @(Get-ExchangeServer | Sort-Object site,name)
+    if ($Log) { Write-Logfile $string25 }
+    $GetExchangeServerResults = @(Get-ExchangeServer | Sort-Object site, name)
     
     #Remove the servers that are ignored from the list of servers to check
     Write-Verbose $string26
-    if ($Log) {Write-Logfile $string26}
-    foreach ($tmpserver in $GetExchangeServerResults)
-    {
-        if (!($ignorelist -icontains $tmpserver.name))
-        {
+    if ($Log) { Write-Logfile $string26 }
+    foreach ($tmpserver in $GetExchangeServerResults) {
+        if (!($ignorelist -icontains $tmpserver.name)) {
             $exchangeservers = $exchangeservers += $tmpserver.identity
         }
     }
 
-    if ($Log) {Write-Logfile $string29}
+    if ($Log) { Write-Logfile $string29 }
     if ($Log) {
-        foreach ($server in $exchangeservers)
-        {
+        foreach ($server in $exchangeservers) {
             Write-Logfile "- $server"
         }
     }
 }
 
 ### Check if any Exchange 2013 servers exist
-if ($GetExchangeServerResults | Where-Object {$_.AdminDisplayVersion -like "Version 15.*"})
-{
+if ($GetExchangeServerResults | Where-Object { $_.AdminDisplayVersion -like "Version 15.*" }) {
     [bool]$HasE15 = $true
 }
 
 ### Begin the Exchange Server health checks
 Write-Verbose $string27
-if ($Log) {Write-Logfile $string27}
-foreach ($server in $exchangeservers)
-{
+if ($Log) { Write-Logfile $string27 }
+foreach ($server in $exchangeservers) {
     Write-Host -ForegroundColor White "$string3 $server"
-    if ($Log) {Write-Logfile "$string3 $server"}
+    if ($Log) { Write-Logfile "$string3 $server" }
     
     #Find out some details about the server
-    try
-    {
+    try {
         $serverinfo = Get-ExchangeServer $server -ErrorAction Stop
     }
-    catch
-    {
+    catch {
         Write-Warning $_.Exception.Message
-        if ($Log) {Write-Logfile $_.Exception.Message}
+        if ($Log) { Write-Logfile $_.Exception.Message }
         $serverinfo = $null
     }
 
-    if ($serverinfo -eq $null )
-    {
+    if ($serverinfo -eq $null ) {
         #Server is not an Exchange server
         Write-Host -ForegroundColor $warn $string0
-        if ($Log) {Write-Logfile $string0}
+        if ($Log) { Write-Logfile $string0 }
     }
-    elseif ( $serverinfo.IsEdgeServer )
-    {
+    elseif ( $serverinfo.IsEdgeServer ) {
         Write-Host -ForegroundColor White $string8
-        if ($Log) {Write-Logfile $string8}
+        if ($Log) { Write-Logfile $string8 }
     }
-    else
-    {
+    else {
         #Server is an Exchange server, continue the health check
 
         #Custom object properties
@@ -692,12 +643,10 @@ foreach ($server in $exchangeservers)
         $serverObj | Add-Member NoteProperty -Name "Server" -Value $server
         
         #Skip Site attribute for Exchange 2003 servers
-        if ($serverinfo.AdminDisplayVersion -like "Version 6.*")
-        {
+        if ($serverinfo.AdminDisplayVersion -like "Version 6.*") {
             $serverObj | Add-Member NoteProperty -Name "Site" -Value "n/a"
         }
-        else
-        {
+        else {
             $site = ($serverinfo.site.ToString()).Split("/")
             $serverObj | Add-Member NoteProperty -Name "Site" -Value $site[-1]
         }
@@ -720,86 +669,75 @@ foreach ($server in $exchangeservers)
         $serverObj | Add-Member NoteProperty -Name "MAPI Test" -Value "n/a"
 
         #Check server name resolves in DNS
-        if ($Log) {Write-Logfile $string30}
+        if ($Log) { Write-Logfile $string30 }
         Write-Host "DNS Check: " -NoNewline;
-        try 
-        {
+        try {
             $ip = @([System.Net.Dns]::GetHostByName($server).AddressList | Select-Object IPAddressToString -ExpandProperty IPAddressToString)
         }
-        catch
-        {
+        catch {
             Write-Host -ForegroundColor $warn $_.Exception.Message
-            if ($Log) {Write-Logfile $_.Exception.Message}
+            if ($Log) { Write-Logfile $_.Exception.Message }
             $ip = $null
         }
 
-        if ( $ip -ne $null )
-        {
+        if ( $ip -ne $null ) {
             Write-Host -ForegroundColor $pass "Pass"
-            if ($Log) {Write-Logfile $string31}
+            if ($Log) { Write-Logfile $string31 }
             $serverObj | Add-Member NoteProperty -Name "DNS" -Value "Pass" -Force
 
             #Is server online
-            if ($Log) {Write-Logfile $string32}
+            if ($Log) { Write-Logfile $string32 }
             Write-Host "Ping Check: " -NoNewline; 
             
             $ping = $null
-            try
-            {
+            try {
                 $ping = Test-Connection $server -Quiet -ErrorAction Stop
             }
-            catch
-            {
+            catch {
                 Write-Host -ForegroundColor $warn $_.Exception.Message
-                if ($Log) {Write-Logfile $_.Exception.Message}
+                if ($Log) { Write-Logfile $_.Exception.Message }
             }
 
-            switch ($ping)
-            {
+            switch ($ping) {
                 $true {
                     Write-Host -ForegroundColor $pass "Pass"
                     $serverObj | Add-Member NoteProperty -Name "Ping" -Value "Pass" -Force
-                    if ($Log) {Write-Logfile $string33}
-                    }
+                    if ($Log) { Write-Logfile $string33 }
+                }
                 default {
                     Write-Host -ForegroundColor $fail "Fail"
                     $serverObj | Add-Member NoteProperty -Name "Ping" -Value "Fail" -Force
                     $serversummary += "$server - $string18"
-                    if ($Log) {Write-Logfile $string18}
-                    }
+                    if ($Log) { Write-Logfile $string18 }
+                }
             }
             
             #Uptime check, even if ping fails
-            if ($Log) {Write-Logfile $string34}
+            if ($Log) { Write-Logfile $string34 }
             [int]$uptime = $null
             #$laststart = $null
             $OS = $null
         
-            try 
-            {
+            try {
                 #$laststart = [System.Management.ManagementDateTimeconverter]::ToDateTime((Get-WmiObject -Class Win32_OperatingSystem -computername $server -ErrorAction Stop).LastBootUpTime)
                 $OS = Get-WmiObject -Class Win32_OperatingSystem -ComputerName $server -ErrorAction STOP
             }
-            catch
-            {
+            catch {
                 Write-Host -ForegroundColor $warn $_.Exception.Message
-                if ($Log) {Write-Logfile $_.Exception.Message}
+                if ($Log) { Write-Logfile $_.Exception.Message }
             }
             
             Write-Host "Uptime (hrs): " -NoNewline
 
-            if ($OS -eq $null)
-            {
+            if ($OS -eq $null) {
                 [string]$uptime = $string17
-                if ($Log) {Write-Logfile $string17}
-                switch ($ping)
-                {
-                    $true {    $serversummary += "$server - $string17" }
+                if ($Log) { Write-Logfile $string17 }
+                switch ($ping) {
+                    $true { $serversummary += "$server - $string17" }
                     default { $serversummary += "$server - $string17" }
                 }
             }
-            else
-            {
+            else {
                 $timespan = $os.ConvertToDateTime($os.LocalDateTime) - $Os.ConvertToDateTime($os.LastBootUpTime)
                 [int]$uptime = "{0:00}" -f $timespan.TotalHours
                 Switch ($uptime -gt 23) {
@@ -809,56 +747,48 @@ foreach ($server in $exchangeservers)
                 }
             }
 
-            if ($Log) {Write-Logfile "Uptime is $uptime hours"}
+            if ($Log) { Write-Logfile "Uptime is $uptime hours" }
 
             $serverObj | Add-Member NoteProperty -Name "Uptime (hrs)" -Value $uptime -Force    
             
-            if ($ping -or ($uptime -ne $string17))
-            {
+            if ($ping -or ($uptime -ne $string17)) {
                 #Determine the friendly version number
                 $ExVer = $serverinfo.AdminDisplayVersion
                 Write-Host "Server version: " -NoNewline;
                 
-                if ($ExVer -like "Version 6.*")
-                {
+                if ($ExVer -like "Version 6.*") {
                     $version = "Exchange 2003"
                 }
                 
-                if ($ExVer -like "Version 8.*")
-                {
+                if ($ExVer -like "Version 8.*") {
                     $version = "Exchange 2007"
                 }
                 
-                if ($ExVer -like "Version 14.*")
-                {
+                if ($ExVer -like "Version 14.*") {
                     $version = "Exchange 2010"
                 }
                 
-                if ($ExVer -like "Version 15.0*")
-                {
+                if ($ExVer -like "Version 15.0*") {
                     $version = "Exchange 2013"
                 }
 
-                if ($ExVer -like "Version 15.1*")
-                {
+                if ($ExVer -like "Version 15.1*") {
                     $version = "Exchange 2016"
                 }
                 
                 Write-Host $version
-                if ($Log) {Write-Logfile "Server is running $version"}
+                if ($Log) { Write-Logfile "Server is running $version" }
                 $serverObj | Add-Member NoteProperty -Name "Version" -Value $version -Force
             
-                if ($version -eq "Exchange 2003")
-                {
+                if ($version -eq "Exchange 2003") {
                     Write-Host $string12
-                    if ($Log) {Write-Logfile $string12}
+                    if ($Log) { Write-Logfile $string12 }
                 }
 
                 #START - Exchange 2013/2010/2007 Health Checks
-                if ($version -ne "Exchange 2003")
-                {
+                if ($version -ne "Exchange 2003") {
                     Write-Host "Roles:" $serverinfo.ServerRole
-                    if ($Log) {Write-Logfile "Server roles: $($serverinfo.ServerRole)"}
+                    if ($Log) { Write-Logfile "Server roles: $($serverinfo.ServerRole)" }
                     $serverObj | Add-Member NoteProperty -Name "Roles" -Value $serverinfo.ServerRole -Force
                     
                     $IsEdge = $serverinfo.IsEdgeServer        
@@ -869,10 +799,9 @@ foreach ($server in $exchangeservers)
                     #START - General Server Health Check
                     #Skipping Edge Transports for the general health check, as firewalls usually get
                     #in the way. If you want to include them, remove this If.
-                    if ($IsEdge -ne $true)
-                    {
+                    if ($IsEdge -ne $true) {
                         #Service health is an array due to how multi-role servers return Test-ServiceHealth status
-                        if ($Log) {Write-Logfile $string35}
+                        if ($Log) { Write-Logfile $string35 }
                         $servicehealth = @()
                         $e15casservicehealth = @()
                         try {
@@ -881,16 +810,14 @@ foreach ($server in $exchangeservers)
                         catch {
                             #Workaround for Test-ServiceHealth problem with CAS-only Exchange 2013 servers
                             #More info: http://exchangeserverpro.com/exchange-2013-test-servicehealth-error/
-                            if ($_.Exception.Message -like "*There are no Microsoft Exchange 2007 server roles installed*")
-                            {
-                                if ($Log) {Write-Logfile $string52}
+                            if ($_.Exception.Message -like "*There are no Microsoft Exchange 2007 server roles installed*") {
+                                if ($Log) { Write-Logfile $string52 }
                                 $e15casservicehealth = Test-E15CASServiceHealth($server)
                             }
-                            else
-                            {
+                            else {
                                 $serversummary += "$server - $string4"
                                 Write-Host -ForegroundColor $warn $string4 ":" $_.Exception
-                                if ($Log) {Write-Logfile $_.Exception}
+                                if ($Log) { Write-Logfile $_.Exception }
                                 $serverObj | Add-Member NoteProperty -Name "Client Access Server Role Services" -Value $string4 -Force
                                 $serverObj | Add-Member NoteProperty -Name "Hub Transport Server Role Services" -Value $string4 -Force
                                 $serverObj | Add-Member NoteProperty -Name "Mailbox Server Role Services" -Value $string4 -Force
@@ -898,51 +825,53 @@ foreach ($server in $exchangeservers)
                             }
                         }
                             
-                        if ($servicehealth)
-                        {
-                            foreach($s in $servicehealth)
-                            {
+                        if ($servicehealth) {
+                            foreach ($s in $servicehealth) {
                                 $roleName = $s.Role
                                 Write-Host $roleName "Services: " -NoNewline;
                                                             
-                                switch ($s.RequiredServicesRunning)
-                                {
+                                switch ($s.RequiredServicesRunning) {
                                     $true {
-                                            $svchealth = "Pass"
-                                            Write-Host -ForegroundColor $pass "Pass"
-                                        }
+                                        $svchealth = "Pass"
+                                        Write-Host -ForegroundColor $pass "Pass"
+                                    }
                                     $false {
-                                            $svchealth = "Fail"
-                                            Write-Host -ForegroundColor $fail "Fail"
-                                            $serversummary += "$server - $rolename $string5"
-                                        }
+                                        $svchealth = "Fail"
+                                        Write-Host -ForegroundColor $fail "Fail"
+                                        $serversummary += "$server - $rolename $string5"
+                                    }
                                     default {
-                                            $svchealth = "Warn"
-                                            Write-Host -ForegroundColor $warn "Warning"
-                                            $serversummary += "$server - $rolename $string5"
-                                        }
+                                        $svchealth = "Warn"
+                                        Write-Host -ForegroundColor $warn "Warning"
+                                        $serversummary += "$server - $rolename $string5"
+                                    }
+                                }
+                                if ($Rolename -match 'Client Access|Acceso de clientes') {
+                                    $serverinfoservices = "Client Access Server Role Services"
+
+                                }
+                                elseif ($rolename -match 'Hub Transport|Transporte') {
+                                    $serverinfoservices = "Hub Transport Server Role Services" 
+                                }
+                                elseif ($rolename -match "Mailbox|buzones") {
+                                    
+                                    $serverinfoservices = "Mailbox Server Role Services" 
+                                }
+                                elseif ($rolename -match "Unified Messaging|Unificada") {
+                                    $serverinfoservices = "Unified Messaging Server Role Services" 
                                 }
 
-                                switch ($s.Role)
-                                {
-                                    $casrole { $serverinfoservices = "Client Access Server Role Services" }
-                                    $htrole { $serverinfoservices = "Hub Transport Server Role Services" }
-                                    $mbrole { $serverinfoservices = "Mailbox Server Role Services" }
-                                    $umrole { $serverinfoservices = "Unified Messaging Server Role Services" }
-                                }
-                                if ($Log) {Write-Logfile "$serverinfoservices status is $svchealth"}    
-                                $serverObj | Add-Member NoteProperty -Name $s.role -Value $svchealth -Force
+                                if ($Log) { Write-Logfile "$serverinfoservices status is $svchealth" }    
+                                $serverObj | Add-Member NoteProperty -Name $serverinfoservices -Value $svchealth -Force
                             }
                         }
                         
-                        if ($e15casservicehealth)
-                        {
+                        if ($e15casservicehealth) {
                             $serverinfoservices = "Client Access Server Role Services"
-                            if ($Log) {Write-Logfile "$serverinfoservices status is $e15casservicehealth"}
+                            if ($Log) { Write-Logfile "$serverinfoservices status is $e15casservicehealth" }
                             $serverObj | Add-Member NoteProperty -Name $serverinfoservices -Value $e15casservicehealth -Force
                             Write-Host $serverinfoservices ": " -NoNewline;
-                            switch ($e15casservicehealth)
-                            {
+                            switch ($e15casservicehealth) {
                                 "Pass" { Write-Host -ForegroundColor $pass "Pass" }
                                 "Fail" { Write-Host -ForegroundColor $fail "Fail" }
                             }
@@ -951,143 +880,122 @@ foreach ($server in $exchangeservers)
                     #END - General Server Health Check
 
                     #START - Hub Transport Server Check
-                    if ($IsHub)
-                    {
+                    if ($IsHub) {
                         $q = $null
-                        if ($Log) {Write-Logfile $string36}
+                        if ($Log) { Write-Logfile $string36 }
                         Write-Host "Total Queue: " -NoNewline; 
                         try {
-                            $q = Get-Queue -server $server -ErrorAction Stop | Where-Object {$_.DeliveryType -ne "ShadowRedundancy"}
+                            $q = Get-Queue -server $server -ErrorAction Stop | Where-Object { $_.DeliveryType -ne "ShadowRedundancy" }
                         }
                         catch {
                             $serversummary += "$server - $string6"
                             Write-Host -ForegroundColor $warn $string6
                             Write-Warning $_.Exception.Message
-                            if ($Log) {Write-Logfile $string6}
-                            if ($Log) {Write-Logfile $_.Exception.Message}
+                            if ($Log) { Write-Logfile $string6 }
+                            if ($Log) { Write-Logfile $_.Exception.Message }
                         }
                         
-                        if ($q)
-                        {
+                        if ($q) {
                             $qcount = $q | Measure-Object MessageCount -Sum
                             [int]$qlength = $qcount.sum
                             $serverObj | Add-Member NoteProperty -Name "Queue Length" -Value $qlength -Force
-                            if ($Log) {Write-Logfile "Queue length is $qlength"}
-                            if ($qlength -le $transportqueuewarn)
-                            {
+                            if ($Log) { Write-Logfile "Queue length is $qlength" }
+                            if ($qlength -le $transportqueuewarn) {
                                 Write-Host -ForegroundColor $pass $qlength
                                 $serverObj | Add-Member NoteProperty -Name "Transport Queue" -Value "Pass ($qlength)" -Force
                             }
-                            elseif ($qlength -gt $transportqueuewarn -and $qlength -lt $transportqueuehigh)
-                            {
+                            elseif ($qlength -gt $transportqueuewarn -and $qlength -lt $transportqueuehigh) {
                                 Write-Host -ForegroundColor $warn $qlength
                                 $serversummary += "$server - Transport queue is above warning threshold" 
                                 $serverObj | Add-Member NoteProperty -Name "Transport Queue" -Value "Warn ($qlength)" -Force
                             }
-                            else
-                            {
+                            else {
                                 Write-Host -ForegroundColor $fail $qlength
                                 $serversummary += "$server - Transport queue is above high threshold"
                                 $serverObj | Add-Member NoteProperty -Name "Transport Queue" -Value "Fail ($qlength)" -Force
                             }
                         }
-                        else
-                        {
+                        else {
                             $serverObj | Add-Member NoteProperty -Name "Transport Queue" -Value "Unknown" -Force
                         }
                     }
                     #END - Hub Transport Server Check
 
                     #START - Mailbox Server Check
-                    if ($IsMB)
-                    {
-                        if ($Log) {Write-Logfile $string37}
+                    if ($IsMB) {
+                        if ($Log) { Write-Logfile $string37 }
                         
                         #Get the PF and MB databases
                         [array]$pfdbs = @(Get-PublicFolderDatabase -server $server -status -WarningAction SilentlyContinue)
-                        [array]$mbdbs = @(Get-MailboxDatabase -server $server -status | Where-Object {$_.Recovery -ne $true})
+                        [array]$mbdbs = @(Get-MailboxDatabase -server $server -status | Where-Object { $_.Recovery -ne $true })
                         
-                        if ($version -ne "Exchange 2007")
-                        {
-                            [array]$activedbs = @(Get-MailboxDatabase -server $server -status | Where-Object {$_.Recovery -ne $true -and $_.MountedOnServer -eq ($serverinfo.fqdn)})
+                        if ($version -ne "Exchange 2007") {
+                            [array]$activedbs = @(Get-MailboxDatabase -server $server -status | Where-Object { $_.Recovery -ne $true -and $_.MountedOnServer -eq ($serverinfo.fqdn) })
                         }
-                        else
-                        {
+                        else {
                             [array]$activedbs = $mbdbs
                         }
                         
                         #START - Database Mount Check
                         
                         #Check public folder databases
-                        if ($pfdbs.count -gt 0)
-                        {
-                            if ($Log) {Write-Logfile $string39}
+                        if ($pfdbs.count -gt 0) {
+                            if ($Log) { Write-Logfile $string39 }
                             Write-Host "Public Folder databases mounted: " -NoNewline;
                             [string]$pfdbstatus = "Pass"
                             [array]$alertdbs = @()
-                            foreach ($db in $pfdbs)
-                            {
-                                if (($db.mounted) -ne $true)
-                                {
+                            foreach ($db in $pfdbs) {
+                                if (($db.mounted) -ne $true) {
                                     $pfdbstatus = "Fail"
                                     $alertdbs += $db.name
                                 }
                             }
 
                             $serverObj | Add-Member NoteProperty -Name "PF DBs Mounted" -Value $pfdbstatus -Force
-                            if ($Log) {Write-Logfile "$string40 $pfdbstatus"}
+                            if ($Log) { Write-Logfile "$string40 $pfdbstatus" }
                             
-                            if ($alertdbs.count -eq 0)
-                            {
+                            if ($alertdbs.count -eq 0) {
                                 Write-Host -ForegroundColor $pass $pfdbstatus
                             }
-                            else
-                            {
+                            else {
                                 Write-Host -ForegroundColor $fail $pfdbstatus
                                 $serversummary += "$server - $string7"
                                 Write-Host "Offline databases:"
-                                foreach ($al in $alertdbs)
-                                {
+                                foreach ($al in $alertdbs) {
                                     Write-Host -ForegroundColor $fail `t$al
                                 }
                             }
                         }
                         
                         #Check mailbox databases
-                        if ($mbdbs.count -gt 0)
-                        {
-                            if ($Log) {Write-Logfile $string41}
+                        if ($mbdbs.count -gt 0) {
+                            if ($Log) { Write-Logfile $string41 }
                         
                             [string]$mbdbstatus = "Pass"
                             [array]$alertdbs = @()
 
                             Write-Host "Mailbox databases mounted: " -NoNewline;
-                            foreach ($db in $mbdbs)
-                            {
-                                if (($db.mounted) -ne $true)
-                                {
+                            foreach ($db in $mbdbs) {
+                                if (($db.mounted) -ne $true) {
                                     $mbdbstatus = "Fail"
                                     $alertdbs += $db.name
                                 }
                             }
 
                             $serverObj | Add-Member NoteProperty -Name "MB DBs Mounted" -Value $mbdbstatus -Force
-                            if ($Log) {Write-Logfile "$string42 $mbdbstatus"}
+                            if ($Log) { Write-Logfile "$string42 $mbdbstatus" }
                             
-                            if ($alertdbs.count -eq 0)
-                            {
+                            if ($alertdbs.count -eq 0) {
                                 Write-Host -ForegroundColor $pass $mbdbstatus
                             }
-                            else
-                            {
+                            else {
                                 $serversummary += "$server - $string9"
                                 Write-Host -ForegroundColor $fail $mbdbstatus
                                 Write-Host $string43
-                                if ($Log) {Write-Logfile $string43}
-                                foreach ($al in $alertdbs)
-                                {
+                                if ($Log) { Write-Logfile $string43 }
+                                foreach ($al in $alertdbs) {
                                     Write-Host -ForegroundColor $fail `t$al
-                                    if ($Log) {Write-Logfile "- $al"}
+                                    if ($Log) { Write-Logfile "- $al" }
                                 }
                             }
                         }
@@ -1095,121 +1003,102 @@ foreach ($server in $exchangeservers)
                         #END - Database Mount Check
                         
                         #START - MAPI Connectivity Test
-                        if ($activedbs.count -gt 0 -or $pfdbs.count -gt 0 -or $version -eq "Exchange 2007")
-                        {
+                        if ($activedbs.count -gt 0 -or $pfdbs.count -gt 0 -or $version -eq "Exchange 2007") {
                             [string]$mapiresult = "Unknown"
                             [array]$alertdbs = @()
-                            if ($Log) {Write-Logfile $string44}
+                            if ($Log) { Write-Logfile $string44 }
                             Write-Host "MAPI connectivity: " -NoNewline;
-                            foreach ($db in $mbdbs)
-                            {
+                            foreach ($db in $mbdbs) {
                                 $mapistatus = Test-MapiConnectivity -Database $db.Identity -PerConnectionTimeout $mapitimeout
-                                if ($mapistatus.Result.Value -eq $null)
-                                {
+                                if ($mapistatus.Result.Value -eq $null) {
                                     $mapiresult = $mapistatus.Result
                                 }
-                                else
-                                {
+                                else {
                                     $mapiresult = $mapistatus.Result.Value
                                 }
-                                if (($mapiresult) -ne "Success")
-                                {
+                                if (($mapiresult) -ne "Success") {
                                     $mapistatus = "Fail"
                                     $alertdbs += $db.name
                                 }
                             }
 
                             $serverObj | Add-Member NoteProperty -Name "MAPI Test" -Value  $mapiresult -Force
-                            if ($Log) {Write-Logfile "$string45  $mapiresult"}
+                            if ($Log) { Write-Logfile "$string45  $mapiresult" }
                             
-                            if ($alertdbs.count -eq 0)
-                            {
+                            if ($alertdbs.count -eq 0) {
                                 Write-Host -ForegroundColor $pass  $mapiresult
                             }
-                            else
-                            {
+                            else {
                                 $serversummary += "$server - $string10"
                                 Write-Host -ForegroundColor $fail  $mapiresult
                                 Write-Host $string46
-                                if ($Log) {Write-Logfile $string46}
-                                foreach ($al in $alertdbs)
-                                {
+                                if ($Log) { Write-Logfile $string46 }
+                                foreach ($al in $alertdbs) {
                                     Write-Host -ForegroundColor $fail `t$al
-                                    if ($Log) {Write-Logfile "- $al"}
+                                    if ($Log) { Write-Logfile "- $al" }
                                 }
                             }
                         }
                         #END - MAPI Connectivity Test
                         
                         #START - Mail Flow Test
-                        if ($version -eq "Exchange 2007" -and $mbdbs.count -gt 0 -and $HasE15)
-                        {
+                        if ($version -eq "Exchange 2007" -and $mbdbs.count -gt 0 -and $HasE15) {
                             #Skip Exchange 2007 mail flow tests when run from Exchange 2013
-                            if ($Log) {Write-Logfile $string47}
+                            if ($Log) { Write-Logfile $string47 }
                             Write-Host "Mail flow test: Skipped"
                             $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value $string51 -Force
-                            if ($Log) {Write-Logfile $string51}
+                            if ($Log) { Write-Logfile $string51 }
                         }
-                        elseif ($activedbs.count -gt 0 -and $HasE15)
-                        {
-                            if ($Log) {Write-Logfile $string47}
+                        elseif ($activedbs.count -gt 0 -and $HasE15) {
+                            if ($Log) { Write-Logfile $string47 }
                             Write-Host "Mail flow test: " -NoNewline;
                             $e15mailflowresult = Test-E15MailFlow($Server)
                             $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value $e15mailflowresult -Force
-                            if ($Log) {Write-Logfile "$string48 $e15mailflowresult"}
+                            if ($Log) { Write-Logfile "$string48 $e15mailflowresult" }
                             
-                            if ($e15mailflowresult -eq $success)
-                            {
+                            if ($e15mailflowresult -eq $success) {
                                 Write-Host -ForegroundColor $pass $e15mailflowresult
                                 $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value "Pass" -Force
                             }
-                            else
-                            {
+                            else {
                                 $serversummary += "$server - $string11"
                                 Write-Host -ForegroundColor $fail $e15mailflowresult
                                 $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value "Fail" -Force
                             }
                         }
-                        elseif ($activedbs.count -gt 0 -or ($version -eq "Exchange 2007" -and $mbdbs.count -gt 0))
-                        {
+                        elseif ($activedbs.count -gt 0 -or ($version -eq "Exchange 2007" -and $mbdbs.count -gt 0)) {
                             $flow = $null
                             $testmailflowresult = $null
                             
-                            if ($Log) {Write-Logfile $string47}
+                            if ($Log) { Write-Logfile $string47 }
                             Write-Host "Mail flow test: " -NoNewline;
-                            try
-                            {
+                            try {
                                 $flow = Test-Mailflow $server -ErrorAction Stop
                             }
-                            catch
-                            {
+                            catch {
                                 $testmailflowresult = $_.Exception.Message
-                                if ($Log) {Write-Logfile $_.Exception.Message}
+                                if ($Log) { Write-Logfile $_.Exception.Message }
                             }
                             
-                            if ($flow)
-                            {
+                            if ($flow) {
                                 $testmailflowresult = $flow.testmailflowresult
-                                if ($Log) {Write-Logfile "$string48 $testmailflowresult"}
+                                if ($Log) { Write-Logfile "$string48 $testmailflowresult" }
                             }
 
-                            if ($testmailflowresult -eq "Success" -or $testmailflowresult -eq $success -or $testmailflowresult -eq 'Correcto')
-                            {
+                            if ($testmailflowresult -eq "Success" -or $testmailflowresult -eq $success -or $testmailflowresult -eq 'Correcto') {
                                 Write-Host -ForegroundColor $pass $testmailflowresult
                                 $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value "Pass" -Force
                             }
-                            else
-                            {
+                            else {
                                 $serversummary += "$server - $string11"
                                 Write-Host -ForegroundColor $fail $testmailflowresult
                                 $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value "Fail" -Force
                             }
                         }
-                        else
-                        {
+                        else {
                             Write-Host "Mail flow test: No active mailbox databases"
                             $serverObj | Add-Member NoteProperty -Name "Mail Flow Test" -Value $string49 -Force
-                            if ($Log) {Write-Logfile $string49}
+                            if ($Log) { Write-Logfile $string49 }
                         }
                         #END - Mail Flow Test
                     }
@@ -1217,28 +1106,26 @@ foreach ($server in $exchangeservers)
 
                 }
                 #END - Exchange 2013/2010/2007 Health Checks
-                if ($Log) {Write-Logfile "$string50 $server"}
+                if ($Log) { Write-Logfile "$string50 $server" }
                 $report = $report + $serverObj
             }
-            else
-            {
+            else {
                 #Server is not reachable and uptime could not be retrieved
                 Write-Host -ForegroundColor $warn $string1
-                if ($Log) {Write-Logfile $string1}
+                if ($Log) { Write-Logfile $string1 }
                 $serversummary += "$server - $string1"
                 $serverObj | Add-Member NoteProperty -Name "Ping" -Value "Fail" -Force
-                if ($Log) {Write-Logfile "$string50 $server"}
+                if ($Log) { Write-Logfile "$string50 $server" }
                 $report = $report + $serverObj
             }
         }
-        else
-        {
+        else {
             Write-Host -ForegroundColor $Fail "Fail"
             Write-Host -ForegroundColor $warn $string13
-            if ($Log) {Write-Logfile $string13}
+            if ($Log) { Write-Logfile $string13 }
             $serversummary += "$server - $string13"
             $serverObj | Add-Member NoteProperty -Name "DNS" -Value "Fail" -Force
-            if ($Log) {Write-Logfile "$string50 $server"}
+            if ($Log) { Write-Logfile "$string50 $server" }
             $report = $report + $serverObj
         }
     }    
@@ -1249,43 +1136,37 @@ foreach ($server in $exchangeservers)
 ### Begin DAG Health Report
 
 #Check if -Server or -Serverlist parameter was used, and skip if it was
-if (!($NoDAG))
-{
-    if ($Log) {Write-Logfile $string60}
+if (!($NoDAG)) {
+    if ($Log) { Write-Logfile $string60 }
     Write-Verbose "Retrieving Database Availability Groups"
 
     #Get all DAGs
     $tmpdags = @(Get-DatabaseAvailabilityGroup)
     $tmpstring = "$($tmpdags.count) DAGs found"
     Write-Verbose $tmpstring
-    if ($Log) {Write-Logfile $tmpstring}
+    if ($Log) { Write-Logfile $tmpstring }
 
     #Remove DAGs in ignorelist
-    foreach ($tmpdag in $tmpdags)
-    {
-        if (!($ignorelist -icontains $tmpdag.name))
-        {
+    foreach ($tmpdag in $tmpdags) {
+        if (!($ignorelist -icontains $tmpdag.name)) {
             $dags += $tmpdag
         }
     }
 
     $tmpstring = "$($dags.count) DAGs will be checked"
     Write-Verbose $tmpstring
-    if ($Log) {Write-Logfile $tmpstring}
+    if ($Log) { Write-Logfile $tmpstring }
 
-    if ($Log) {Write-Logfile $string68}
+    if ($Log) { Write-Logfile $string68 }
     if ($Log) {
-        foreach ($dag in $dags)
-        {
+        foreach ($dag in $dags) {
             Write-Logfile "- $dag"
         }
     }
 }
 
-if ($($dags.count) -gt 0)
-{
-    foreach ($dag in $dags)
-    {
+if ($($dags.count) -gt 0) {
+    foreach ($dag in $dags) {
         
         #Strings for use in the HTML report/email
         $dagsummaryintro = "<p>Database Availability Group <strong>$($dag.Name)</strong> Health Summary:</p>"
@@ -1300,54 +1181,48 @@ if ($($dags.count) -gt 0)
         
         $tmpstring = "---- Processing DAG $($dag.Name)"
         Write-Verbose $tmpstring
-        if ($Log) {Write-Logfile $tmpstring}
+        if ($Log) { Write-Logfile $tmpstring }
         
         $dagmembers = @($dag | Select-Object -ExpandProperty Servers | Sort-Object Name)
         $tmpstring = "$($dagmembers.count) DAG members found"
         Write-Verbose $tmpstring
-        if ($Log) {Write-Logfile $tmpstring}
+        if ($Log) { Write-Logfile $tmpstring }
         
         #Get all databases in the DAG
-        if ($HasE15)
-        {
-            $tmpdatabases = @(Get-MailboxDatabase -Status -IncludePreExchange2013 | Where-Object {$_.Recovery -ne $true -and $_.MasterServerOrAvailabilityGroup -eq $dag.Name} | Sort-Object Name)
+        if ($HasE15) {
+            $tmpdatabases = @(Get-MailboxDatabase -Status -IncludePreExchange2013 | Where-Object { $_.Recovery -ne $true -and $_.MasterServerOrAvailabilityGroup -eq $dag.Name } | Sort-Object Name)
         }
-        else
-        {
-            $tmpdatabases = @(Get-MailboxDatabase -Status | Where-Object {$_.Recovery -ne $true -and $_.MasterServerOrAvailabilityGroup -eq $dag.Name} | Sort-Object Name)
+        else {
+            $tmpdatabases = @(Get-MailboxDatabase -Status | Where-Object { $_.Recovery -ne $true -and $_.MasterServerOrAvailabilityGroup -eq $dag.Name } | Sort-Object Name)
         }
 
-        foreach ($tmpdatabase in $tmpdatabases)
-        {
-            if (!($ignorelist -icontains $tmpdatabase.name))
-            {
+        foreach ($tmpdatabase in $tmpdatabases) {
+            if (!($ignorelist -icontains $tmpdatabase.name)) {
                 $dagdatabases += $tmpdatabase
             }
         }
                 
         $tmpstring = "$($dagdatabases.count) DAG databases will be checked"
         Write-Verbose $tmpstring
-        if ($Log) {Write-Logfile $tmpstring}
+        if ($Log) { Write-Logfile $tmpstring }
 
-        if ($Log) {Write-Logfile $string69}
+        if ($Log) { Write-Logfile $string69 }
         if ($Log) {
-            foreach ($database in $dagdatabases)
-            {
+            foreach ($database in $dagdatabases) {
                 Write-Logfile "- $database"
             }
         }
         
-        foreach ($database in $dagdatabases)
-        {
+        foreach ($database in $dagdatabases) {
             $tmpstring = "---- Processing database $database"
             Write-Verbose $tmpstring
-            if ($Log) {Write-Logfile $tmpstring}
+            if ($Log) { Write-Logfile $tmpstring }
 
             $activationPref = $null
             $totalcopies = $null
             $healthycopies = $null
             $unhealthycopies = $null
-            $healthyqueues  = $null
+            $healthyqueues = $null
             $unhealthyqueues = $null
             $laggedqueues = $null
             $healthyindexes = $null
@@ -1355,130 +1230,119 @@ if ($($dags.count) -gt 0)
 
             #Custom object for Database
             $objectHash = @{
-                            "Database" = $database.Identity
-                            "Mounted on" = "Unknown"
-                            "Preference" = $null
-                            "Total Copies" = $null
-                            "Healthy Copies" = $null
-                            "Unhealthy Copies" = $null
-                            "Healthy Queues" = $null
-                            "Unhealthy Queues" = $null
-                            "Lagged Queues" = $null
-                            "Healthy Indexes" = $null
-                            "Unhealthy Indexes" = $null
-                            }
+                "Database"          = $database.Identity
+                "Mounted on"        = "Unknown"
+                "Preference"        = $null
+                "Total Copies"      = $null
+                "Healthy Copies"    = $null
+                "Unhealthy Copies"  = $null
+                "Healthy Queues"    = $null
+                "Unhealthy Queues"  = $null
+                "Lagged Queues"     = $null
+                "Healthy Indexes"   = $null
+                "Unhealthy Indexes" = $null
+            }
             $databaseObj = New-Object PSObject -Property $objectHash
 
             $dbcopystatus = @($database | Get-MailboxDatabaseCopyStatus)
             $tmpstring = "$database has $($dbcopystatus.Count) copies"
             Write-Verbose $tmpstring
-            if ($Log) {Write-Logfile $tmpstring}
+            if ($Log) { Write-Logfile $tmpstring }
             
-            foreach ($dbcopy in $dbcopystatus)
-            {
+            foreach ($dbcopy in $dbcopystatus) {
                 #Custom object for DB copy
                 $objectHash = @{
-                                "Database Copy" = $dbcopy.Identity
-                                "Database Name" = $dbcopy.DatabaseName
-                                "Mailbox Server" = $null
-                                "Activation Preference" = $null
-                                "Status" = $null
-                                "Copy Queue" = $null
-                                "Replay Queue" = $null
-                                "Replay Lagged" = $null
-                                "Truncation Lagged" = $null
-                                "Content Index" = $null
-                                }
+                    "Database Copy"         = $dbcopy.Identity
+                    "Database Name"         = $dbcopy.DatabaseName
+                    "Mailbox Server"        = $null
+                    "Activation Preference" = $null
+                    "Status"                = $null
+                    "Copy Queue"            = $null
+                    "Replay Queue"          = $null
+                    "Replay Lagged"         = $null
+                    "Truncation Lagged"     = $null
+                    "Content Index"         = $null
+                }
                 $dbcopyObj = New-Object PSObject -Property $objectHash
                 
                 $tmpstring = "Database Copy: $($dbcopy.Identity)"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
                 
                 $mailboxserver = $dbcopy.MailboxServer
                 $tmpstring = "Server: $mailboxserver"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
 
-                $pref = ($database | Select-Object -ExpandProperty ActivationPreference | Where-Object {$_.Key -ieq $mailboxserver}).Value
+                $pref = ($database | Select-Object -ExpandProperty ActivationPreference | Where-Object { $_.Key -ieq $mailboxserver }).Value
                 $tmpstring = "Activation Preference: $pref"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
 
                 $copystatus = $dbcopy.Status
                 $tmpstring = "Status: $copystatus"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
                 
                 [int]$copyqueuelength = $dbcopy.CopyQueueLength
                 $tmpstring = "Copy Queue: $copyqueuelength"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
                 
                 [int]$replayqueuelength = $dbcopy.ReplayQueueLength
                 $tmpstring = "Replay Queue: $replayqueuelength"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
                 
-                if ($($dbcopy.ContentIndexErrorMessage -match "is disabled in Active Directory"))
-                {
+                if ($($dbcopy.ContentIndexErrorMessage -match "is disabled in Active Directory")) {
                     $contentindexstate = "Disabled"
                 }
-                else
-                {
+                else {
                     $contentindexstate = $dbcopy.ContentIndexState
                 }
                 $tmpstring = "Content Index: $contentindexstate"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}                
+                if ($Log) { Write-Logfile $tmpstring }                
 
                 #Checking whether this is a replay lagged copy
-                $replaylagcopies = @($database | Select-Object -ExpandProperty ReplayLagTimes | Where-Object {$_.Value -gt 0})
-                if ($($replaylagcopies.count) -gt 0)
-                {
+                $replaylagcopies = @($database | Select-Object -ExpandProperty ReplayLagTimes | Where-Object { $_.Value -gt 0 })
+                if ($($replaylagcopies.count) -gt 0) {
                     [bool]$replaylag = $false
-                    foreach ($replaylagcopy in $replaylagcopies)
-                    {
-                        if ($replaylagcopy.Key -ieq $mailboxserver)
-                        {
+                    foreach ($replaylagcopy in $replaylagcopies) {
+                        if ($replaylagcopy.Key -ieq $mailboxserver) {
                             $tmpstring = "$database is replay lagged on $mailboxserver"
                             Write-Verbose $tmpstring
-                            if ($Log) {Write-Logfile $tmpstring}
+                            if ($Log) { Write-Logfile $tmpstring }
                             [bool]$replaylag = $true
                         }
                     }
                 }
-                else
-                {
-                   [bool]$replaylag = $false
+                else {
+                    [bool]$replaylag = $false
                 }
                 $tmpstring = "Replay lag is $replaylag"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}                
+                if ($Log) { Write-Logfile $tmpstring }                
                         
                 #Checking for truncation lagged copies
-                $truncationlagcopies = @($database | Select-Object -ExpandProperty TruncationLagTimes | Where-Object {$_.Value -gt 0})
-                if ($($truncationlagcopies.count) -gt 0)
-                {
+                $truncationlagcopies = @($database | Select-Object -ExpandProperty TruncationLagTimes | Where-Object { $_.Value -gt 0 })
+                if ($($truncationlagcopies.count) -gt 0) {
                     [bool]$truncatelag = $false
-                    foreach ($truncationlagcopy in $truncationlagcopies)
-                    {
-                        if ($truncationlagcopy.Key -eq $mailboxserver)
-                        {
+                    foreach ($truncationlagcopy in $truncationlagcopies) {
+                        if ($truncationlagcopy.Key -eq $mailboxserver) {
                             $tmpstring = "$database is truncate lagged on $mailboxserver"
                             Write-Verbose $tmpstring
-                            if ($Log) {Write-Logfile $tmpstring}                            
+                            if ($Log) { Write-Logfile $tmpstring }                            
                             [bool]$truncatelag = $true
                         }
                     }
                 }
-                else
-                {
-                   [bool]$truncatelag = $false
+                else {
+                    [bool]$truncatelag = $false
                 }
                 $tmpstring = "Truncation lag is $truncatelag"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
                 
                 $dbcopyObj | Add-Member NoteProperty -Name "Mailbox Server" -Value $mailboxserver -Force
                 $dbcopyObj | Add-Member NoteProperty -Name "Activation Preference" -Value $pref -Force
@@ -1495,8 +1359,7 @@ if ($($dags.count) -gt 0)
             $copies = @($dagdbcopyReport | Where-Object { ($_."Database Name" -eq $database) })
         
             $mountedOn = ($copies | Where-Object { ($_.Status -eq "Mounted") })."Mailbox Server"
-            if ($mountedOn)
-            {
+            if ($mountedOn) {
                 $databaseObj | Add-Member NoteProperty -Name "Mounted on" -Value $mountedOn -Force
             }
         
@@ -1512,7 +1375,7 @@ if ($($dags.count) -gt 0)
             $unhealthycopies = @($copies | Where-Object { (($_.Status -ne "Mounted") -and ($_.Status -ne "Healthy")) }).Count
             $databaseObj | Add-Member NoteProperty -Name "Unhealthy Copies" -Value $unhealthycopies -Force
 
-            $healthyqueues  = @($copies | Where-Object { (($_."Copy Queue" -lt $replqueuewarning) -and (($_."Replay Queue" -lt $replqueuewarning)) -and ($_."Replay Lagged" -eq $false)) }).Count
+            $healthyqueues = @($copies | Where-Object { (($_."Copy Queue" -lt $replqueuewarning) -and (($_."Replay Queue" -lt $replqueuewarning)) -and ($_."Replay Lagged" -eq $false)) }).Count
             $databaseObj | Add-Member NoteProperty -Name "Healthy Queues" -Value $healthyqueues -Force
 
             $unhealthyqueues = @($copies | Where-Object { (($_."Copy Queue" -ge $replqueuewarning) -or (($_."Replay Queue" -ge $replqueuewarning) -and ($_."Replay Lagged" -eq $false))) }).Count
@@ -1532,67 +1395,60 @@ if ($($dags.count) -gt 0)
         }
         
         #Get Test-Replication Health results for each DAG member
-        foreach ($dagmember in $dagmembers)
-        {
+        foreach ($dagmember in $dagmembers) {
             $replicationhealth = $null
 
             $replicationhealthitems = @{
-                                        ClusterService = $null
-                                        ReplayService = $null
-                                        ActiveManager = $null
-                                        TasksRpcListener = $null
-                                        TcpListener = $null
-                                        ServerLocatorService = $null
-                                        DagMembersUp = $null
-                                        ClusterNetwork = $null
-                                        QuorumGroup = $null
-                                        FileShareQuorum = $null
-                                        DatabaseRedundancy = $null
-                                        DatabaseAvailability = $null
-                                        DBCopySuspended = $null
-                                        DBCopyFailed = $null
-                                        DBInitializing = $null
-                                        DBDisconnected = $null
-                                        DBLogCopyKeepingUp = $null
-                                        DBLogReplayKeepingUp = $null
-                                        }
+                ClusterService       = $null
+                ReplayService        = $null
+                ActiveManager        = $null
+                TasksRpcListener     = $null
+                TcpListener          = $null
+                ServerLocatorService = $null
+                DagMembersUp         = $null
+                ClusterNetwork       = $null
+                QuorumGroup          = $null
+                FileShareQuorum      = $null
+                DatabaseRedundancy   = $null
+                DatabaseAvailability = $null
+                DBCopySuspended      = $null
+                DBCopyFailed         = $null
+                DBInitializing       = $null
+                DBDisconnected       = $null
+                DBLogCopyKeepingUp   = $null
+                DBLogReplayKeepingUp = $null
+            }
 
             $memberObj = New-Object PSObject -Property $replicationhealthitems
             $memberObj | Add-Member NoteProperty -Name "Server" -Value $($dagmember.Name)
         
             $tmpstring = "---- Checking replication health for $($dagmember.Name)"
             Write-Verbose $tmpstring
-            if ($Log) {Write-Logfile $tmpstring}
+            if ($Log) { Write-Logfile $tmpstring }
             
-            if ($HasE15)
-            {
-                $DagMemberVer = ($GetExchangeServerResults | Where-Object {$_.Name -ieq $dagmember.Name}).AdminDisplayVersion.ToString()
+            if ($HasE15) {
+                $DagMemberVer = ($GetExchangeServerResults | Where-Object { $_.Name -ieq $dagmember.Name }).AdminDisplayVersion.ToString()
             }
             
 
-            if ($DagMemberVer -like "Version 14.*")
-            {
-                if ($Log) {Write-Logfile "Using E14 replication health test workaround"}
+            if ($DagMemberVer -like "Version 14.*") {
+                if ($Log) { Write-Logfile "Using E14 replication health test workaround" }
                 $replicationhealth = Test-E14ReplicationHealth $dagmember
             }
-            else
-            {
+            else {
                 $replicationhealth = Test-ReplicationHealth -Identity $dagmember
             }
             
-            foreach ($healthitem in $replicationhealth)
-            {
-                if ($($healthitem.Result) -eq $null)
-                {
+            foreach ($healthitem in $replicationhealth) {
+                if ($($healthitem.Result) -eq $null) {
                     $healthitemresult = "n/a"
                 }
-                else
-                {
+                else {
                     $healthitemresult = $($healthitem.Result)
                 }
                 $tmpstring = "$($healthitem.Check) $healthitemresult"
                 Write-Verbose $tmpstring
-                if ($Log) {Write-Logfile $tmpstring}
+                if ($Log) { Write-Logfile $tmpstring }
                 $memberObj | Add-Member NoteProperty -Name $($healthitem.Check) -Value $healthitemresult -Force
             }
             $dagmemberReport += $memberObj
@@ -1600,8 +1456,7 @@ if ($($dags.count) -gt 0)
 
         
         #Generate the HTML from the DAG health checks
-        if ($SendEmail -or $ReportFile)
-        {
+        if ($SendEmail -or $ReportFile) {
         
             ####Begin Summary Table HTML
             $dagdatabaseSummaryHtml = $null
@@ -1626,29 +1481,25 @@ if ($($dags.count) -gt 0)
             #End Summary table HTML header
             
             #Begin Summary table HTML rows
-            foreach ($line in $dagdatabaseSummary)
-            {
+            foreach ($line in $dagdatabaseSummary) {
                 $htmltablerow = "<tr>"
                 $htmltablerow += "<td><strong>$($line.Database)</strong></td>"
                 
                 #Warn if mounted server is still unknown
-                switch ($($line."Mounted on"))
-                {
+                switch ($($line."Mounted on")) {
                     "Unknown" {
                         $htmltablerow += "<td class=""warn"">$($line."Mounted on")</td>"
                         $dagsummary += "$($line.Database) - $string61"
-                        }
+                    }
                     default { $htmltablerow += "<td>$($line."Mounted on")</td>" }
                 }
                 
                 #Warn if DB is mounted on a server that is not Activation Preference 1
-                if ($($line.Preference) -gt 1)
-                {
+                if ($($line.Preference) -gt 1) {
                     $htmltablerow += "<td class=""warn"">$($line.Preference)</td>"
                     $dagsummary += "$($line.Database) - $string62 $($line.Preference)"
                 }
-                else
-                {
+                else {
                     $htmltablerow += "<td class=""pass"">$($line.Preference)</td>"
                 }
                 
@@ -1656,70 +1507,59 @@ if ($($dags.count) -gt 0)
                 
                 #Show as info if health copies is 1 but total copies also 1,
                 #Warn if healthy copies is 1, Fail if 0
-                switch ($($line."Healthy Copies"))
-                {    
-                    0 {$htmltablerow += "<td class=""fail"">$($line."Healthy Copies")</td>"}
+                switch ($($line."Healthy Copies")) {    
+                    0 { $htmltablerow += "<td class=""fail"">$($line."Healthy Copies")</td>" }
                     1 {
-                        if ($($line."Total Copies") -eq $($line."Healthy Copies"))
-                        {
+                        if ($($line."Total Copies") -eq $($line."Healthy Copies")) {
                             $htmltablerow += "<td class=""info"">$($line."Healthy Copies")</td>"
                         }
-                        else
-                        {
+                        else {
                             $htmltablerow += "<td class=""warn"">$($line."Healthy Copies")</td>"
                         }
-                      }
-                    default {$htmltablerow += "<td class=""pass"">$($line."Healthy Copies")</td>"}
+                    }
+                    default { $htmltablerow += "<td class=""pass"">$($line."Healthy Copies")</td>" }
                 }
 
                 #Warn if unhealthy copies is 1, fail if more than 1
-                switch ($($line."Unhealthy Copies"))
-                {
-                    0 {    $htmltablerow += "<td class=""pass"">$($line."Unhealthy Copies")</td>" }
+                switch ($($line."Unhealthy Copies")) {
+                    0 { $htmltablerow += "<td class=""pass"">$($line."Unhealthy Copies")</td>" }
                     1 {
                         $htmltablerow += "<td class=""warn"">$($line."Unhealthy Copies")</td>"
                         $dagsummary += "$($line.Database) - $string63 $($line."Unhealthy Copies") $string65 $($line."Total Copies") $string66"
-                        }
+                    }
                     default {
                         $htmltablerow += "<td class=""fail"">$($line."Unhealthy Copies")</td>"
                         $dagsummary += "$($line.Database) - $string63 $($line."Unhealthy Copies") $string65 $($line."Total Copies") $string66"
-                        }
+                    }
                 }
 
                 #Warn if healthy queues + lagged queues is less than total copies
                 #Fail if no healthy queues
-                if ($($line."Total Copies") -eq ($($line."Healthy Queues") + $($line."Lagged Queues")))
-                {
+                if ($($line."Total Copies") -eq ($($line."Healthy Queues") + $($line."Lagged Queues"))) {
                     $htmltablerow += "<td class=""pass"">$($line."Healthy Queues")</td>"
                 }
-                else
-                {
+                else {
                     $dagsummary += "$($line.Database) - $string64 $($line."Healthy Queues") $string65 $($line."Total Copies") $string66"
-                    switch ($($line."Healthy Queues"))
-                    {
-                        0 {    $htmltablerow += "<td class=""fail"">$($line."Healthy Queues")</td>" }
+                    switch ($($line."Healthy Queues")) {
+                        0 { $htmltablerow += "<td class=""fail"">$($line."Healthy Queues")</td>" }
                         default { $htmltablerow += "<td class=""warn"">$($line."Healthy Queues")</td>" }
                     }
                 }
                 
                 #Fail if unhealthy queues = total queues
                 #Warn if more than one unhealthy queue
-                if ($($line."Total Queues") -eq $($line."Unhealthy Queues"))
-                {
+                if ($($line."Total Queues") -eq $($line."Unhealthy Queues")) {
                     $htmltablerow += "<td class=""fail"">$($line."Unhealthy Queues")</td>"
                 }
-                else
-                {
-                    switch ($($line."Unhealthy Queues"))
-                    {
+                else {
+                    switch ($($line."Unhealthy Queues")) {
                         0 { $htmltablerow += "<td class=""pass"">$($line."Unhealthy Queues")</td>" }
                         default { $htmltablerow += "<td class=""warn"">$($line."Unhealthy Queues")</td>" }
                     }
                 }
                 
                 #Info for lagged queues
-                switch ($($line."Lagged Queues"))
-                {
+                switch ($($line."Lagged Queues")) {
                     0 { $htmltablerow += "<td>$($line."Lagged Queues")</td>" }
                     default { $htmltablerow += "<td class=""info"">$($line."Lagged Queues")</td>" }
                 }
@@ -1727,15 +1567,12 @@ if ($($dags.count) -gt 0)
                 #Pass if healthy indexes = total copies
                 #Warn if healthy indexes less than total copies
                 #Fail if healthy indexes = 0
-                if ($($line."Total Copies") -eq $($line."Healthy Indexes"))
-                {
+                if ($($line."Total Copies") -eq $($line."Healthy Indexes")) {
                     $htmltablerow += "<td class=""pass"">$($line."Healthy Indexes")</td>"
                 }
-                else
-                {
+                else {
                     $dagsummary += "$($line.Database) - $string67 $($line."Unhealthy Indexes") $string65 $($line."Total Copies") $string66"
-                    switch ($($line."Healthy Indexes"))
-                    {
+                    switch ($($line."Healthy Indexes")) {
                         0 { $htmltablerow += "<td class=""fail"">$($line."Healthy Indexes")</td>" }
                         default { $htmltablerow += "<td class=""warn"">$($line."Healthy Indexes")</td>" }
                     }
@@ -1744,14 +1581,11 @@ if ($($dags.count) -gt 0)
                 #Fail if unhealthy indexes = total copies
                 #Warn if unhealthy indexes 1 or more
                 #Pass if unhealthy indexes = 0
-                if ($($line."Total Copies") -eq $($line."Unhealthy Indexes"))
-                {
+                if ($($line."Total Copies") -eq $($line."Unhealthy Indexes")) {
                     $htmltablerow += "<td class=""fail"">$($line."Unhealthy Indexes")</td>"
                 }
-                else
-                {
-                    switch ($($line."Unhealthy Indexes"))
-                    {
+                else {
+                    switch ($($line."Unhealthy Indexes")) {
                         0 { $htmltablerow += "<td class=""pass"">$($line."Unhealthy Indexes")</td>" }
                         default { $htmltablerow += "<td class=""warn"">$($line."Unhealthy Indexes")</td>" }
                     }
@@ -1787,16 +1621,14 @@ if ($($dags.count) -gt 0)
             #End Detail table HTML header
             
             #Begin Detail table HTML rows
-            foreach ($line in $dagdbcopyReport)
-            {
+            foreach ($line in $dagdbcopyReport) {
                 $htmltablerow = "<tr>"
                 $htmltablerow += "<td><strong>$($line."Database Copy")</strong></td>"
                 $htmltablerow += "<td>$($line."Database Name")</td>"
                 $htmltablerow += "<td>$($line."Mailbox Server")</td>"
                 $htmltablerow += "<td>$($line."Activation Preference")</td>"
                 
-                Switch ($($line."Status"))
-                {
+                Switch ($($line."Status")) {
                     "Healthy" { $htmltablerow += "<td class=""pass"">$($line."Status")</td>" }
                     "Mounted" { $htmltablerow += "<td class=""pass"">$($line."Status")</td>" }
                     "Failed" { $htmltablerow += "<td class=""fail"">$($line."Status")</td>" }
@@ -1806,39 +1638,32 @@ if ($($dags.count) -gt 0)
                     default { $htmltablerow += "<td class=""warn"">$($line."Status")</td>" }
                 }
                 
-                if ($($line."Copy Queue") -lt $replqueuewarning)
-                {
+                if ($($line."Copy Queue") -lt $replqueuewarning) {
                     $htmltablerow += "<td class=""pass"">$($line."Copy Queue")</td>"
                 }
-                else
-                {
+                else {
                     $htmltablerow += "<td class=""warn"">$($line."Copy Queue")</td>"
                 }
                 
-                if (($($line."Replay Queue") -lt $replqueuewarning) -or ($($line."Replay Lagged") -eq $true))
-                {
+                if (($($line."Replay Queue") -lt $replqueuewarning) -or ($($line."Replay Lagged") -eq $true)) {
                     $htmltablerow += "<td class=""pass"">$($line."Replay Queue")</td>"
                 }
-                else
-                {
+                else {
                     $htmltablerow += "<td class=""warn"">$($line."Replay Queue")</td>"
                 }
                 
 
-                Switch ($($line."Replay Lagged"))
-                {
+                Switch ($($line."Replay Lagged")) {
                     $true { $htmltablerow += "<td class=""info"">$($line."Replay Lagged")</td>" }
                     default { $htmltablerow += "<td>$($line."Replay Lagged")</td>" }
                 }
 
-                Switch ($($line."Truncation Lagged"))
-                {
+                Switch ($($line."Truncation Lagged")) {
                     $true { $htmltablerow += "<td class=""info"">$($line."Truncation Lagged")</td>" }
                     default { $htmltablerow += "<td>$($line."Truncation Lagged")</td>" }
                 }
                 
-                Switch ($($line."Content Index"))
-                {
+                Switch ($($line."Content Index")) {
                     "Healthy" { $htmltablerow += "<td class=""pass"">$($line."Content Index")</td>" }
                     "Disabled" { $htmltablerow += "<td class=""info"">$($line."Content Index")</td>" }
                     default { $htmltablerow += "<td class=""warn"">$($line."Content Index")</td>" }
@@ -1884,8 +1709,7 @@ if ($($dags.count) -gt 0)
             #End Member table HTML header
             
             #Begin Member table HTML rows
-            foreach ($line in $dagmemberReport)
-            {
+            foreach ($line in $dagmemberReport) {
                 $htmltablerow = "<tr>"
                 $htmltablerow += "<td><strong>$($line."Server")</strong></td>"
                 $htmltablerow += (New-DAGMemberHTMLTableCell "ClusterService")
@@ -1926,18 +1750,16 @@ if ($($dags.count) -gt 0)
         #Write-Host "`r`n---- Server Test-Replication Report ----`r`n"
         #$dagmemberReport | ft
         
-        if ($SendEmail -or $ReportFile)
-        {
+        if ($SendEmail -or $ReportFile) {
             $dagreporthtml = $dagsummaryintro + $dagdatabaseSummaryHtml + $dagdetailintro + $databasedetailsHtml + $dagmemberintro + $dagmemberHtml
             $dagreportbody += $dagreporthtml
         }
         
     }
 }
-else
-{
+else {
     $tmpstring = "No DAGs found"
-    if ($Log) {Write-LogFile $tmpstring}
+    if ($Log) { Write-LogFile $tmpstring }
     Write-Verbose $tmpstring
     $dagreporthtml = "<p>No database availability groups found.</p>"
 }
@@ -1945,14 +1767,13 @@ else
 
 Write-Host $string16
 ### Begin report generation
-if ($ReportMode -or $SendEmail)
-{
+if ($ReportMode -or $SendEmail) {
     #Get report generation timestamp
     $reportime = Get-Date
 
     #Create HTML Report
     #Common HTML head and styles
-    $htmlhead="<html>
+    $htmlhead = "<html>
                 <style>
                 BODY{font-family: Arial; font-size: 8pt;}
                 H1{font-size: 16px;}
@@ -1971,8 +1792,7 @@ if ($ReportMode -or $SendEmail)
                 <h3 align=""center"">Generated: $reportime</h3>"
 
     #Check if the server summary has 1 or more entries
-    if ($($serversummary.count) -gt 0)
-    {
+    if ($($serversummary.count) -gt 0) {
         #Set alert flag to true
         $alerts = $true
     
@@ -1981,23 +1801,20 @@ if ($ReportMode -or $SendEmail)
                         <p>The following server errors and warnings were detected.</p>
                         <p>
                         <ul>"
-        foreach ($reportline in $serversummary)
-        {
-            $serversummaryhtml +="<li>$reportline</li>"
+        foreach ($reportline in $serversummary) {
+            $serversummaryhtml += "<li>$reportline</li>"
         }
         $serversummaryhtml += "</ul></p>"
         $alerts = $true
     }
-    else
-    {
+    else {
         #Generate the HTML to show no alerts
         $serversummaryhtml = "<h3>Exchange Server Health Check Summary</h3>
                         <p>No Exchange server health errors or warnings.</p>"
     }
     
     #Check if the DAG summary has 1 or more entries
-    if ($($dagsummary.count) -gt 0)
-    {
+    if ($($dagsummary.count) -gt 0) {
         #Set alert flag to true
         $alerts = $true
     
@@ -2006,15 +1823,13 @@ if ($ReportMode -or $SendEmail)
                         <p>The following DAG errors and warnings were detected.</p>
                         <p>
                         <ul>"
-        foreach ($reportline in $dagsummary)
-        {
-            $dagsummaryhtml +="<li>$reportline</li>"
+        foreach ($reportline in $dagsummary) {
+            $dagsummaryhtml += "<li>$reportline</li>"
         }
         $dagsummaryhtml += "</ul></p>"
         $alerts = $true
     }
-    else
-    {
+    else {
         #Generate the HTML to show no alerts
         $dagsummaryhtml = "<h3>Database Availability Group Health Check Summary</h3>
                         <p>No Exchange DAG errors or warnings.</p>"
@@ -2047,8 +1862,7 @@ if ($ReportMode -or $SendEmail)
     #Exchange Server Health Report Table
     $serverhealthhtmltable = $serverhealthhtmltable + $htmltableheader                    
                         
-    foreach ($reportline in $report)
-    {
+    foreach ($reportline in $report) {
         $htmltablerow = "<tr>"
         $htmltablerow += "<td>$($reportline.server)</td>"
         $htmltablerow += "<td>$($reportline.site)</td>"
@@ -2057,23 +1871,18 @@ if ($ReportMode -or $SendEmail)
         $htmltablerow += (New-ServerHealthHTMLTableCell "dns")
         $htmltablerow += (New-ServerHealthHTMLTableCell "ping")
         
-        if ($($reportline."uptime (hrs)") -eq "Access Denied")
-        {
+        if ($($reportline."uptime (hrs)") -eq "Access Denied") {
             $htmltablerow += "<td class=""warn"">Access Denied</td>"        
         }
-        elseif ($($reportline."uptime (hrs)") -eq $string17)
-        {
+        elseif ($($reportline."uptime (hrs)") -eq $string17) {
             $htmltablerow += "<td class=""warn"">$string17</td>"
         }
-        else
-        {
+        else {
             $hours = [int]$($reportline."uptime (hrs)")
-            if ($hours -le 24)
-            {
+            if ($hours -le 24) {
                 $htmltablerow += "<td class=""warn"">$hours</td>"
             }
-            else
-            {
+            else {
                 $htmltablerow += "<td class=""pass"">$hours</td>"
             }
         }
@@ -2083,24 +1892,19 @@ if ($ReportMode -or $SendEmail)
         $htmltablerow += (New-ServerHealthHTMLTableCell "Mailbox Server Role Services")
         $htmltablerow += (New-ServerHealthHTMLTableCell "Unified Messaging Server Role Services")
         #$htmltablerow += (New-ServerHealthHTMLTableCell "Transport Queue")
-        if ($($reportline."Transport Queue") -match "Pass")
-        {
+        if ($($reportline."Transport Queue") -match "Pass") {
             $htmltablerow += "<td class=""pass"">$($reportline."Transport Queue")</td>"
         }
-        elseif ($($reportline."Transport Queue") -match "Warn")
-        {
+        elseif ($($reportline."Transport Queue") -match "Warn") {
             $htmltablerow += "<td class=""warn"">$($reportline."Transport Queue")</td>"
         }
-        elseif ($($reportline."Transport Queue") -match "Fail")
-        {
+        elseif ($($reportline."Transport Queue") -match "Fail") {
             $htmltablerow += "<td class=""fail"">$($reportline."Transport Queue")</td>"
         }
-        elseif ($($reportline."Transport Queue") -eq "n/a")
-        {
+        elseif ($($reportline."Transport Queue") -eq "n/a") {
             $htmltablerow += "<td>$($reportline."Transport Queue")</td>"
         }
-        else
-        {
+        else {
             $htmltablerow += "<td class=""warn"">$($reportline."Transport Queue")</td>"
         }
         $htmltablerow += (New-ServerHealthHTMLTableCell "PF DBs Mounted")
@@ -2124,16 +1928,13 @@ if ($ReportMode -or $SendEmail)
         $htmlreport | Out-File $ReportFile -Encoding UTF8
     }
 
-    if ($SendEmail)
-    {
-        if ($alerts -eq $false -and $AlertsOnly -eq $true)
-        {
+    if ($SendEmail) {
+        if ($alerts -eq $false -and $AlertsOnly -eq $true) {
             #Do not send email message
             Write-Host $string19
-            if ($Log) {Write-Logfile $string19}
+            if ($Log) { Write-Logfile $string19 }
         }
-        else
-        {
+        else {
             #Send email message
             Write-Host $string14
             Send-MailMessage @smtpsettings -Body $htmlreport -BodyAsHtml -Encoding ([System.Text.Encoding]::UTF8)
@@ -2144,4 +1945,4 @@ if ($ReportMode -or $SendEmail)
 
 
 Write-Host $string15
-if ($Log) {Write-Logfile $string15}
+if ($Log) { Write-Logfile $string15 }
