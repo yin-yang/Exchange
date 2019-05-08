@@ -47,7 +47,8 @@ Foreach ($mailbox in $mailboxes) {
         alias                    = $mailbox.alias
         primarySmtpAddress       = $mailbox.primarySmtpAddress
         database                 = $mailbox.database
-        TotalItemSize            = $statistics.TotalItemSize
+        TotalItemSizeInBytes     = $statistics.TotalItemSize -replace “(.*\()|,| [a-z]*\)”, “”
+        TotalItemSizeInGB        = [math]::Round($statistics.TotalItemSizeInBytes / 1GB, 2)
         ProhibitSentQuota        = $prohibit_send_quota
         ProhibitSendReceiveQuota = $send_receive_quota
     }
