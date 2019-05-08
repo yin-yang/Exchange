@@ -24,33 +24,37 @@ Foreach ($mailbox in $mailboxes) {
         
     } # if 
         
+    $statistics = $mailbox | get-mailboxStatistics
     # quotas
     if (-not $quota_values.prohibitsendquota.isunlimited) {
         $prohibit_send_quota = $quota_values.prohibitsendquota | Select-Object -ExpandProperty Value
-        $prohibit_send_quota = [math]::Round($prohibit_send_quota  / 1GB, 2) 
 
+        $prohibit_send_quota = $prohibit_send_quota -replace “(.*\()|,| [a-z]*\)”, “”
+        $prohibit_send_quota = [math]::Round($prohibit_send_quota / 1GB, 2)
     }
     else {
         $prohibit_send_quota = "Unlimited"
     } # if else
-
+    
     if (-not $quota_values.prohibitsendreceivequota.isunlimited) {
         $send_receive_quota = $quota_values.prohibitsendreceivequota | Select-Object -ExpandProperty Value
-        $send_receive_quota = [math]::Round($send_receive_quota / 1GB, 2) 
+        $send_receive_quota = $send_receive_quota -replace “(.*\()|,| [a-z]*\)”, “”
+        $send_receive_quota = [math]::Round($send_receive_quota / 1GB, 2)
         
     }
     else {
         $send_receive_quota = "Unlimited"
     } # if else
 
-    $statistics = $mailbox | get-mailboxStatistics
+
+    $TotalItemSizeInBytes = $statistics.TotalItemSize 
+
 
     $Property = @{
         alias                    = $mailbox.alias
         primarySmtpAddress       = $mailbox.primarySmtpAddress
         database                 = $mailbox.database
-        TotalItemSizeInBytes     = $statistics.TotalItemSize -replace “(.*\()|,| [a-z]*\)”, “”
-        TotalItemSizeInGB        = [math]::Round($statistics.TotalItemSizeInBytes / 1GB, 2)
+        TotalItemSizeInGB        = [math]::Round($TotalItemSizeInBytes / 1GB, 2)
         ProhibitSentQuota        = $prohibit_send_quota
         ProhibitSendReceiveQuota = $send_receive_quota
     }
