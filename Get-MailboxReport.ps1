@@ -49,7 +49,6 @@ Foreach ($mailbox in $mailboxes) {
 
     $TotalItemSizeInBytes = $statistics.TotalItemSize.Value -replace “(.*\()|,| [a-z]*\)”, “”
 
-
     $Property = @{
         alias                    = $mailbox.alias
         primarySmtpAddress       = $mailbox.primarySmtpAddress
@@ -57,6 +56,7 @@ Foreach ($mailbox in $mailboxes) {
         TotalItemSizeInMB        = [math]::Round($TotalItemSizeInBytes / 1MB, 2)
         ProhibitSentQuota        = $prohibit_send_quota
         ProhibitSendReceiveQuota = $send_receive_quota
+        LastLogonTime            = $statistics.LastLogonTime
     }
 
     $Object = New-Object PSObject -Property $Property
