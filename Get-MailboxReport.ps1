@@ -27,6 +27,7 @@ Foreach ($mailbox in $mailboxes) {
     # quotas
     if (-not $quota_values.prohibitsendquota.isunlimited) {
         $prohibit_send_quota = $quota_values.prohibitsendquota | Select-Object -ExpandProperty Value
+        $prohibit_send_quota = [math]::Round($prohibit_send_quota  / 1GB, 2) 
 
     }
     else {
@@ -35,10 +36,11 @@ Foreach ($mailbox in $mailboxes) {
 
     if (-not $quota_values.prohibitsendreceivequota.isunlimited) {
         $send_receive_quota = $quota_values.prohibitsendreceivequota | Select-Object -ExpandProperty Value
-
+        $send_receive_quota = [math]::Round($send_receive_quota / 1GB, 2) 
+        
     }
     else {
-        $prohibit_send_quota = "Unlimited"
+        $send_receive_quota = "Unlimited"
     } # if else
 
     $statistics = $mailbox | get-mailboxStatistics
