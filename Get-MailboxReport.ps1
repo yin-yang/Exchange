@@ -47,7 +47,7 @@ Foreach ($mailbox in $mailboxes) {
     } # if else
 
 
-    $TotalItemSizeInBytes = $statistics.TotalItemSize 
+    $TotalItemSizeInBytes = $statistics.TotalItemSize.Value -replace “(.*\()|,| [a-z]*\)”, “”
 
 
     $Property = @{
