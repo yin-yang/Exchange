@@ -1,3 +1,11 @@
+[CmdletBinding()]
+
+param (
+
+    [string]
+    $Path = ('{0}\report.csv' -f $env:USERPROFILE )
+
+)
 
 $Mailboxes = Get-Mailbox -ResultSize Unlimited -IgnoreDefaultScope
 $Databases = Get-MailboxDatabase
@@ -36,11 +44,11 @@ Foreach ($mailbox in $mailboxes) {
     $statistics = $mailbox | get-mailboxStatistics
 
     $Property = @{
-        alias = $mailbox.alias
-        primarySmtpAddress = $mailbox.primarySmtpAddress
-        database = $mailbox.database
-        TotalItemSize = $statistics.TotalItemSize
-        ProhibitSentQuota = $prohibit_send_quota
+        alias                    = $mailbox.alias
+        primarySmtpAddress       = $mailbox.primarySmtpAddress
+        database                 = $mailbox.database
+        TotalItemSize            = $statistics.TotalItemSize
+        ProhibitSentQuota        = $prohibit_send_quota
         ProhibitSendReceiveQuota = $send_receive_quota
     }
 
@@ -50,4 +58,5 @@ Foreach ($mailbox in $mailboxes) {
     
 } # foreach
 
-$list | Export-Csv -NoTypeInformation C:\buzones.csv
+Write-Verbose "Exporting data to file $Path"
+$list | Export-Csv -NoTypeInformation -Path $Path -Encoding Unicode
