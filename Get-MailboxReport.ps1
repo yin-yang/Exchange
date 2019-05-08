@@ -30,7 +30,7 @@ Foreach ($mailbox in $mailboxes) {
         $prohibit_send_quota = $quota_values.prohibitsendquota | Select-Object -ExpandProperty Value
 
         $prohibit_send_quota = $prohibit_send_quota -replace “(.*\()|,| [a-z]*\)”, “”
-        $prohibit_send_quota = [math]::Round($prohibit_send_quota / 1GB, 2)
+        $prohibit_send_quota = [math]::Round($prohibit_send_quota / 1MB, 2)
     }
     else {
         $prohibit_send_quota = "Unlimited"
@@ -39,7 +39,7 @@ Foreach ($mailbox in $mailboxes) {
     if (-not $quota_values.prohibitsendreceivequota.isunlimited) {
         $send_receive_quota = $quota_values.prohibitsendreceivequota | Select-Object -ExpandProperty Value
         $send_receive_quota = $send_receive_quota -replace “(.*\()|,| [a-z]*\)”, “”
-        $send_receive_quota = [math]::Round($send_receive_quota / 1GB, 2)
+        $send_receive_quota = [math]::Round($send_receive_quota / 1MB, 2)
         
     }
     else {
@@ -54,7 +54,7 @@ Foreach ($mailbox in $mailboxes) {
         alias                    = $mailbox.alias
         primarySmtpAddress       = $mailbox.primarySmtpAddress
         database                 = $mailbox.database
-        TotalItemSizeInGB        = [math]::Round($TotalItemSizeInBytes / 1GB, 2)
+        TotalItemSizeInMB        = [math]::Round($TotalItemSizeInBytes / 1MB, 2)
         ProhibitSentQuota        = $prohibit_send_quota
         ProhibitSendReceiveQuota = $send_receive_quota
     }
