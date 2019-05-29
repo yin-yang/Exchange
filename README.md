@@ -1,21 +1,21 @@
-Exchange Server
+Exchange Server :e-mail:
 =======================================================================
-Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y administrar la plataforma.
+Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y administrar la plataforma. :coffee:
 
 ![Exchange Server](https://github.com/yin-yang/Exchange/blob/master/resources/exchange.png)
 
-## Lista de contenidos
+## Lista de contenidos 
 
 * [Herramientas](https://github.com/yin-yang/Exchange/#Herramientas)
 * [Blogs de Utilidad](https://github.com/yin-yang/Exchange/#Blogs-de-utilidad)
 * [Cmdlets](https://github.com/yin-yang/Exchange/#Cmdlets)
-  * Chequeo de salud
-  * Relevamiento
-* Guía de operación y reportes
-
-## Herramientas
+  * Chequeo de salud :construction:
+  * Relevamiento :construction:
+* Guía de operación y reportes :construction:
 
 ---
+
+## Herramientas
 
 * [MXToolBox](https://mxtoolbox.com/): Chequeo de dominio, headers, blacklist, test de registros dns.
 * [Test Connectivity](https://www.testconnectivity.microsoft.com/): Test de conectividad de outlook, autodiscover, activesync, chequeo de headers.
@@ -31,9 +31,10 @@ Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y adm
 * [ProcMonitor](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon): monitoreo de procesos
 * [Veeam Exchange Discovery Tool (Free)](https://www.veeam.com/blog/how-to-free-exchange-discovery-tool-helps-admin.html>): Explorar bases de datos EDB.
 
-## Blogs de Utilidad
-
 ---
+
+## Blogs de Utilidad :gem:
+
 *En los siguientes blogs encontraran guías, tutoriales, resolución de problemas, etc. Son altamente recomendados para leer y hacer seguimiento.*
 
 * [Practical365](https://practical365.com)
@@ -41,9 +42,9 @@ Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y adm
 * [MSExchangeGuru](http://msexchangeguru.com/)
 * [Exchange Experts](https://www.experts-exchange.com/)
 
-## Cmdlets
-
 ---
+
+## Cmdlets
 
 1. Copiar archivo Test-ExchangeServerHealth.ps1
 2. Ejecutar desde un servidor Exchange (2010, 2013 o 2016)
