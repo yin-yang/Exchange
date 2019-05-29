@@ -1,8 +1,8 @@
 Exchange Server
 =======================================================================
-Una lista de fuentes de Exchange
+Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y administrar la plataforma.
 
-![Exchange Server](https://github.com/yin-yang/Exchange/resources/exchange.png)
+![Exchange Server](https://github.com/yin-yang/Exchange/blob/master/resources/exchange.png)
 
 ## Lista de contenidos
 
