@@ -9,7 +9,7 @@ Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y adm
 * [Herramientas](https://github.com/yin-yang/Exchange/#Herramientas)
 * [Blogs de Utilidad](https://github.com/yin-yang/Exchange/#Blogs-de-utilidad)
 * [Cmdlets](https://github.com/yin-yang/Exchange/#Cmdlets)
-  * [Chequeo de salud]((https://github.com/yin-yang/Exchange/#Health-Check)
+  * [Chequeo de salud](https://github.com/yin-yang/Exchange/#Health-Check)
   * Relevamiento :construction:
 * Guía de operación y reportes :construction:
 
@@ -50,7 +50,7 @@ Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y adm
 1. [Get-HealthReport](https://docs.microsoft.com/en-us/powershell/module/exchange/server-health-and-performance/get-healthreport?view=exchange-ps) (Exchange 2013 o superior) Reporte de salud de servidor
 
 `Get-ExchangeServer | Get-HealthReport`
-Más info:
+
 * https://blogs.technet.microsoft.com/managing_availability/2013/05/29/getting-the-health-of-an-exchange-server/
 * https://docs.microsoft.com/en-us/exchange/high-availability/managed-availability/health-sets?view=exchserver-2019
 
@@ -61,31 +61,25 @@ Más info:
 Estado de todas las bases de datos.
 
 4. [Test-ReplicationHealth](https://docs.microsoft.com/en-us/powershell/module/exchange/database-availability-groups/test-replicationhealth?view=exchange-ps): Verificación de replicación DAG.
-
 `Test-ReplicationHealth | ? {$_.result -like "*error*" | select -expand error }`
-
 Muestra detalle de errores de replicación.
   
 5. [Get-Queue](https://docs.microsoft.com/en-us/powershell/module/exchange/mail-flow/get-queue?view=exchange-ps): Información de las colas de correos en servidores de transporte.
-
 `Get-Queue *`
 
 6. [Test-ExchangeServerHealth](https://github.com/yin-yang/Exchange/blob/master/Test-ExchangeServerHealth.ps1) Chequeo  sobre plataforma Exchange (2010, 2013, 2016).
-  
 Para generar un reporte:
-
 `Test-ExchangeServerHealth -ReportFile .\archivo.html -ReportMode`
 
 7. [Get-ServerHealth](https://docs.microsoft.com/en-us/powershell/module/exchange/server-health-and-performance/get-serverhealth?view=exchange-ps) (Exchange 2013, 2016, 2019) Chequeo de servidor Exchange.
 
-
 8. [Test-MailFlow](https://docs.microsoft.com/en-us/powershell/module/exchange/mail-flow/Test-Mailflow?view=exchange-ps)
 
-`Test-MailFlow Server1 -TargetMailboxServer Server2`
-Chequea Mail Flow desde Server1 a Server2.
+    `Test-MailFlow Server1 -TargetMailboxServer Server2`
+    Chequea Mail Flow desde Server1 a Server2.
 
-`Test-MailFlow -TargetEmailAddress jose@contoso.com`
-Chequea envío de correo desde servidor hacia el buzón especificado.
+    `Test-MailFlow -TargetEmailAddress jose@contoso.com`
+    Chequea envío de correo desde servidor hacia el buzón especificado.
 
 9. [Get-ServerComponentState](https://docs.microsoft.com/en-us/powershell/module/exchange/server-health-and-performance/get-servercomponentstate?view=exchange-ps) (Exchange 2013 o superior) Muestra estado de los componentes y endpoints de Exchange.
 
