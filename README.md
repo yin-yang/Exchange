@@ -49,7 +49,7 @@ Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y adm
 ### Health check
 1. [Get-HealthReport](https://docs.microsoft.com/en-us/powershell/module/exchange/server-health-and-performance/get-healthreport?view=exchange-ps) (Exchange 2013 o superior) Reporte de salud de servidor
 
-`Get-ExchangeServer | Get-HealthReport`
+    `Get-ExchangeServer | Get-HealthReport`
 
 * https://blogs.technet.microsoft.com/managing_availability/2013/05/29/getting-the-health-of-an-exchange-server/
 * https://docs.microsoft.com/en-us/exchange/high-availability/managed-availability/health-sets?view=exchserver-2019
@@ -57,19 +57,22 @@ Una lista de fuentes de Exchange de gran utilidad para implementar, migrar y adm
 2. [Test-ServiceHealth](https://docs.microsoft.com/en-us/powershell/module/exchange/server-health-and-performance/test-servicehealth?view=exchange-ps) Verificación de servicios.
 
 3. [Get-MailboxDatabaseCopyStatus](https://docs.microsoft.com/en-us/powershell/module/exchange/database-availability-groups/get-mailboxdatabasecopystatus?view=exchange-ps) Detalle de bases de datos y sus copias.
-`Get-MailboxDatabaseCopyStatus *`
-Estado de todas las bases de datos.
+
+    `Get-MailboxDatabaseCopyStatus *`
+    Estado de todas las bases de datos.
 
 4. [Test-ReplicationHealth](https://docs.microsoft.com/en-us/powershell/module/exchange/database-availability-groups/test-replicationhealth?view=exchange-ps): Verificación de replicación DAG.
-`Test-ReplicationHealth | ? {$_.result -like "*error*" | select -expand error }`
-Muestra detalle de errores de replicación.
+
+    `Test-ReplicationHealth | ? {$_.result -like "*error*" | select -expand error }`
+    Muestra detalle de errores de replicación.
   
 5. [Get-Queue](https://docs.microsoft.com/en-us/powershell/module/exchange/mail-flow/get-queue?view=exchange-ps): Información de las colas de correos en servidores de transporte.
-`Get-Queue *`
+
+    `Get-Queue *`
 
 6. [Test-ExchangeServerHealth](https://github.com/yin-yang/Exchange/blob/master/Test-ExchangeServerHealth.ps1) Chequeo  sobre plataforma Exchange (2010, 2013, 2016).
-Para generar un reporte:
-`Test-ExchangeServerHealth -ReportFile .\archivo.html -ReportMode`
+    Para generar un reporte:
+    `Test-ExchangeServerHealth -ReportFile .\archivo.html -ReportMode`
 
 7. [Get-ServerHealth](https://docs.microsoft.com/en-us/powershell/module/exchange/server-health-and-performance/get-serverhealth?view=exchange-ps) (Exchange 2013, 2016, 2019) Chequeo de servidor Exchange.
 
