@@ -24,7 +24,7 @@ variable "admin_username" {
 
 variable "admin_password" {
   description = "The password of the administrator user"
-  default     = ""
+  default     = "SuperPasword123+"
 }
 
 variable "vm_size" {
